@@ -72,10 +72,10 @@ export default class ObsidibaggerPlugin extends Plugin {
 	async authenticate(): Promise<void> {
 		const { instanceUrl, clientId, clientSecret, username, password } = this.settings;
 		if (!instanceUrl || !clientId || !clientSecret || !username || !password) {
-			new Notice('Obsidibagger: Please fill in all Wallabag credentials in the settings.');
+			new Notice('Please fill in all Wallabag credentials in the settings.');
 			throw new Error('Missing credentials');
 		}
-		new Notice('Obsidibagger: Authenticating with Wallabag...');
+		new Notice('Authenticating with Wallabag...');
 		const url = `${instanceUrl}/oauth/v2/token`;
 		const body = new URLSearchParams({
 			grant_type: 'password',
@@ -90,7 +90,7 @@ export default class ObsidibaggerPlugin extends Plugin {
 			body
 		});
 		if (!resp.ok) {
-			new Notice('Obsidibagger: Failed to authenticate with Wallabag.');
+			new Notice('Failed to authenticate with Wallabag.');
 			throw new Error(await resp.text());
 		}
 		const data = await resp.json();
@@ -117,10 +117,10 @@ export default class ObsidibaggerPlugin extends Plugin {
 			for (const article of articles) {
 				await this.createOrUpdateArticleNote(article, folderPath);
 			}
-			new Notice(`Obsidibagger: Synced ${articles.length} Wallabag articles.`);
+			new Notice(`Synced ${articles.length} Wallabag articles.`);
 		} catch (e) {
 			console.error(e);
-			new Notice('Obsidibagger: Sync failed. See console for details.');
+			new Notice('Sync failed. See console for details.');
 		}
 	}
 
@@ -132,7 +132,7 @@ export default class ObsidibaggerPlugin extends Plugin {
 		let hasMore = true;
 		const newSince = Date.now() / 1000;
 
-		new Notice('Obsidibagger: Fetching Wallabag articles...');
+		new Notice('Fetching Wallabag articles...');
 		while (hasMore) {
 			let wbURL = `${instanceUrl}/api/entries.json?since=${since}&page=${page}&perPage=30`
 			if (this.settings.onlyStarred) { wbURL += '&starred=1'; }
