@@ -1,6 +1,6 @@
 {
 	"name": "wallabag-sync",
-	"version": "0.1.3",
+	"version": "0.1.4",
 	"description": "Sync articles from Wallabag to your Obsidian vault.",
 	"main": "main.js",
 	"scripts": {
