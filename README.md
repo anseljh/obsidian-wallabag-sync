@@ -1,4 +1,4 @@
-# Obsibagger
+# Obsidibagger
 
 This is an [Obsidian](https://obsidian.md) plugin to sync your articles from Wallabag, an open-source read-it-later app, to your Obsidian vault.
 

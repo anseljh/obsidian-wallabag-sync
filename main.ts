@@ -215,7 +215,7 @@ class ObsidibaggerSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Folder for Wallabag notes')
-			.setDesc('Synced articles will appear as notes here.')
+			.setDesc('Synced articles will appear as notes here')
 			.addText(text => text
 				.setValue(this.plugin.settings.noteFolder || 'Wallabag')
 				.onChange(async (value) => {
@@ -234,8 +234,8 @@ class ObsidibaggerSettingTab extends PluginSettingTab {
 				})
 			);
 		
-		containerEl.createEl('h2', { text: 'Wallabag Server' });
-		containerEl.createEl('span', { text: 'Create a new Client in your ' });
+		containerEl.createEl('h2', { text: 'Wallabag server' });
+		containerEl.createEl('span', { text: 'Create a new client in your ' });
 		containerEl.createEl('a', { href: "https://app.wallabag.it/developer", text: "Wallabag account settings"});
 		containerEl.createEl('span', { text: '.' });
 
@@ -251,7 +251,7 @@ class ObsidibaggerSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('OAuth Client ID')
+			.setName('OAuth client ID')
 			.setDesc('Your Wallabag OAuth client ID')
 			.addText(text => text
 				.setValue(this.plugin.settings.clientId || '')
@@ -261,7 +261,7 @@ class ObsidibaggerSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('OAuth Client Secret')
+			.setName('OAuth Client secret')
 			.setDesc('Your Wallabag OAuth client secret')
 			.addText(text => text
 				.setPlaceholder('Enter OAuth client secret')
@@ -272,7 +272,7 @@ class ObsidibaggerSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('Wallabag Username')
+			.setName('Wallabag username')
 			.setDesc('Your Wallabag username')
 			.addText(text => text
 				.setValue(this.plugin.settings.username || '')
@@ -282,7 +282,7 @@ class ObsidibaggerSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('Wallabag Password')
+			.setName('Wallabag password')
 			.setDesc('Your Wallabag password (stored locally)')
 			.addText(text => text
 				.setValue(this.plugin.settings.password || '')
@@ -291,12 +291,12 @@ class ObsidibaggerSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 					}));
 
-		containerEl.createEl('h2', { text: 'Danger Zone', cls: 'danger' });
+		containerEl.createEl('h2', { text: 'Danger zone', cls: 'danger' });
 
 		new Setting(containerEl)
 			.setName('Reset sync memory')
 			.setClass('danger')
-			.setDesc('This will reset the last sync timestamp and force a full resync of all articles.')
+			.setDesc('This will reset the last-sync timestamp and force a full resync of all articles.')
 			.addButton(resetSyncButton => resetSyncButton
 			// .setIcon('refresh-cw-off')
 			.setButtonText('Reset sync')
