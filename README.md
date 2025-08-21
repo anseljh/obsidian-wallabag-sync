@@ -1,4 +1,4 @@
-# Obsidibagger
+# Wallabag Sync
 
 This is an [Obsidian](https://obsidian.md) plugin to sync your articles from Wallabag, an open-source read-it-later app, to your Obsidian vault.
 
@@ -7,11 +7,11 @@ This is an [Obsidian](https://obsidian.md) plugin to sync your articles from Wal
 This is a really simple plugin. It does exactly one thing: it it syncs articles you've saved in Wallabag into your Obsidian Vault. It only does this when you tell it to, which you can do in two ways:
 
 - Clicking the little "W" ribbon icon, or
-- By invoking the command "Obsidibagger: Sync Wallabag articles" from the Command Palette.
+- By invoking the command "Wallabag Sync: Sync Wallabag articles" from the Command Palette.
 
 ## Sync everything instead of favorites
 
-By default, Obsidibagger only syncs articles you have **starred** in Wallabag. This is great if you save and read lots of articles in Wallabag, but only want some of them to end up in Obsidian.
+By default, Wallabag Sync only syncs articles you have **starred** in Wallabag. This is great if you save and read lots of articles in Wallabag, but only want some of them to end up in Obsidian.
 
 However, if you want it to sync **everything**, go to the plugin settings, toggle the "Only sync starred articles" setting to off, click the "Reset sync" button, and then try syncing again.
 

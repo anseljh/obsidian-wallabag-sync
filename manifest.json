@@ -1,9 +1,9 @@
 {
-	"id": "obsidibagger",
-	"name": "Obsidibagger",
-	"version": "0.1.2",
+	"id": "wallabag-sync",
+	"name": "Wallabag Sync",
+	"version": "0.1.3",
 	"minAppVersion": "0.15.0",
-	"description": "Sync your Wallabag articles to your Obsidian vault",
+	"description": "Sync articles from Wallabag to your Obsidian vault.",
 	"author": "Ansel Halliburton",
 	"authorUrl": "https://www.anseljh.com/",
 	"isDesktopOnly": false
