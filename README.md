@@ -15,13 +15,13 @@ By default, Wallabag Sync only syncs articles you have **starred** in Wallabag. 
 
 However, if you want it to sync **everything**, go to the plugin settings, toggle the "Only sync starred articles" setting to off, click the "Reset sync" button, and then try syncing again.
 
-Your first sync might take a while, especially if you're syncing everything. Hoewver, because the plugin keeps track of when you last synced, subsequent syncs should be fast.
+Your first sync might take a while, especially if you're syncing everything. However, because the plugin keeps track of when you last synced, subsequent syncs should be fast.
 
 ## Similar work
 
 - Huseyin Zengin's [obsidian-wallabag](https://github.com/huseyz/obsidian-wallabag/) plugin, no longer actively developed
 
-## Developmment resources
+## Development resources
 
 - [Obsidian plugin developer documentation](https://docs.obsidian.md/Plugins/Getting+started/Build+a+plugin)
 - [Wallabag documentation](https://doc.wallabag.org/)
