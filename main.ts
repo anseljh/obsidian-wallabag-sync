@@ -1,4 +1,5 @@
 import { App, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
+import TurndownService from 'turndown';
 
 const PLUGIN_NAME = 'Wallabag Sync';
 const DEBUG = false; // Set to true to enable debug logging
@@ -9,7 +10,7 @@ function debugLog(message: string) {
 	}
 }
 
-interface ObsidibaggerSettings {
+interface WallabagSyncSettings {
 	// user-visible settings:
 	noteFolder: string;
 	instanceUrl: string;
@@ -25,15 +26,16 @@ interface ObsidibaggerSettings {
 	since: number; // Unix timestamp of last sync
 }
 
-const DEFAULT_SETTINGS: Partial<ObsidibaggerSettings> = {
+const DEFAULT_SETTINGS: Partial<WallabagSyncSettings> = {
 	instanceUrl: 'https://app.wallabag.it',
 	noteFolder: 'Wallabag',
 	onlyStarred: true,
 	since: 0, // default to 0 for no articles synced
 }
 
-export default class ObsidibaggerPlugin extends Plugin {
-	settings: ObsidibaggerSettings;
+export default class WallabagSyncPlugin extends Plugin {
+	settings: WallabagSyncSettings;
+	turndownService: TurndownService;
 
 	async onload() {
 		debugLog(`Loading plugin ${PLUGIN_NAME}...`)
@@ -52,7 +54,10 @@ export default class ObsidibaggerPlugin extends Plugin {
 		});
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new ObsidibaggerSettingTab(this.app, this));
+		this.addSettingTab(new WallabagSyncSettingTab(this.app, this));
+
+		// Init Turndown for converting HTML to Markdown
+		this.turndownService = new TurndownService({ headingStyle: 'atx', hr: '---', bulletListMarker: '-', codeBlockStyle: 'fenced' });
 
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
@@ -186,20 +191,8 @@ wallabag id: ${article.id}
 
 # ${article.title}
 
-${article.content ? this.htmlToMarkdown(article.content) : ''}
+${article.content ? this.turndownService.turndown(article.content) : ''}
 `;
-	}
-
-	// Basic HTML to Markdown; for full fidelity, consider using Turndown or another HTML-to-MD converter.
-	htmlToMarkdown(html: string): string {
-		return html
-			.replace(/<br\s*\/?>/gi, '\n')
-			.replace(/<\/?[^>]+(>|$)/g, '') // strip tags
-			.replace(/&nbsp;/g, ' ')
-			.replace(/&amp;/g, '&')
-			.replace(/&lt;/g, '<')
-			.replace(/&gt;/g, '>')
-			.trim();
 	}
 
 	async ensureFolderExists(folder: string) {
@@ -211,16 +204,16 @@ ${article.content ? this.htmlToMarkdown(article.content) : ''}
 
 }
 
-class ObsidibaggerSettingTab extends PluginSettingTab {
-	plugin: ObsidibaggerPlugin;
+class WallabagSyncSettingTab extends PluginSettingTab {
+	plugin: WallabagSyncPlugin;
 
-	constructor(app: App, plugin: ObsidibaggerPlugin) {
+	constructor(app: App, plugin: WallabagSyncPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
 
 	display(): void {
-		const {containerEl} = this;
+		const { containerEl } = this;
 
 		containerEl.empty();
 
@@ -245,11 +238,11 @@ class ObsidibaggerSettingTab extends PluginSettingTab {
 					this.display();
 				})
 			);
-		
+
 		new Setting(containerEl).setName('Server and authentication').setHeading();
 
 		containerEl.createEl('span', { text: 'Create a new client in your ' });
-		containerEl.createEl('a', { href: "https://app.wallabag.it/developer", text: "Wallabag account settings"});
+		containerEl.createEl('a', { href: "https://app.wallabag.it/developer", text: "Wallabag account settings" });
 		containerEl.createEl('span', { text: '.' });
 
 		new Setting(containerEl)
@@ -302,7 +295,7 @@ class ObsidibaggerSettingTab extends PluginSettingTab {
 				.onChange(async (value) => {
 					this.plugin.settings.password = value.trim();
 					await this.plugin.saveSettings();
-					}));
+				}));
 
 		new Setting(containerEl).setName('Danger zone').setHeading().setClass('danger');
 
@@ -311,12 +304,12 @@ class ObsidibaggerSettingTab extends PluginSettingTab {
 			.setClass('danger')
 			.setDesc('This will reset the last-sync timestamp and force a full resync of all articles.')
 			.addButton(resetSyncButton => resetSyncButton
-			.setButtonText('Reset sync')
-			.onClick(async () => {
-				this.plugin.settings.since = 0;
-				await this.plugin.saveSettings();
-				new Notice('Sync memory reset.');
-			}))
+				.setButtonText('Reset sync')
+				.onClick(async () => {
+					this.plugin.settings.since = 0;
+					await this.plugin.saveSettings();
+					new Notice('Sync memory reset.');
+				}))
 
 	}
 }
