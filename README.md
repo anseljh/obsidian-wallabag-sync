@@ -20,6 +20,7 @@ Your first sync might take a while, especially if you're syncing everything. How
 ## Similar work
 
 - Huseyin Zengin's [obsidian-wallabag](https://github.com/huseyz/obsidian-wallabag/) plugin, no longer actively developed
+- [quantumgardener's fork](https://github.com/quantumgardener/obsidian-wallabag) of the above plugin
 
 ## Development resources
 
