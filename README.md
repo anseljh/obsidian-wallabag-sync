@@ -6,7 +6,7 @@ This is an [Obsidian](https://obsidian.md) plugin to sync your articles from Wal
 
 This is a really simple plugin. It does exactly one thing: it it syncs articles you've saved in Wallabag into your Obsidian Vault. It only does this when you tell it to, which you can do in two ways:
 
-- Clicking the little "W" ribbon icon, or
+- Clicking the little newspaper icon in the ribbon, or
 - By invoking the command "Wallabag Sync: Sync Wallabag articles" from the Command Palette.
 
 ## Sync everything instead of favorites
