@@ -1,4 +1,13 @@
-import { addIcon, App, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
+import { App, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
+
+const PLUGIN_NAME = 'Wallabag Sync';
+const DEBUG = false; // Set to true to enable debug logging
+
+function debugLog(message: string) {
+	if (DEBUG) {
+		console.log(message);
+	}
+}
 
 interface ObsidibaggerSettings {
 	// user-visible settings:
@@ -27,6 +36,7 @@ export default class ObsidibaggerPlugin extends Plugin {
 	settings: ObsidibaggerSettings;
 
 	async onload() {
+		debugLog(`Loading plugin ${PLUGIN_NAME}...`)
 		await this.loadSettings();
 
 		// Create a little icon on the left ribbon.
@@ -46,16 +56,20 @@ export default class ObsidibaggerPlugin extends Plugin {
 
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
-		});
+		// this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
+		// 	console.log('click', evt);
+		// });
 
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
 		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+
+		debugLog(`Finished loading plugin ${PLUGIN_NAME}.`)
 	}
 
 	onunload() {
-
+		// Add these back in when the method does something:
+		// debugLog(`Unloading plugin ${PLUGIN_NAME}...`)
+		// debugLog(`Finished unloading plugin ${PLUGIN_NAME}.`)
 	}
 
 	async loadSettings() {
@@ -212,7 +226,7 @@ class ObsidibaggerSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Folder for Wallabag notes')
-			.setDesc('Synced articles will appear as notes here')
+			.setDesc('Synced articles will appear as notes here.')
 			.addText(text => text
 				.setValue(this.plugin.settings.noteFolder || 'Wallabag')
 				.onChange(async (value) => {
@@ -222,6 +236,7 @@ class ObsidibaggerSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Only sync starred articles')
+			.setDesc('Toggle this off to sync all articles.')
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.onlyStarred)
 				.onChange(async (value) => {
@@ -231,7 +246,8 @@ class ObsidibaggerSettingTab extends PluginSettingTab {
 				})
 			);
 		
-		containerEl.createEl('h2', { text: 'Wallabag server' });
+		new Setting(containerEl).setName('Server and authentication').setHeading();
+
 		containerEl.createEl('span', { text: 'Create a new client in your ' });
 		containerEl.createEl('a', { href: "https://app.wallabag.it/developer", text: "Wallabag account settings"});
 		containerEl.createEl('span', { text: '.' });
@@ -288,14 +304,13 @@ class ObsidibaggerSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 					}));
 
-		containerEl.createEl('h2', { text: 'Danger zone', cls: 'danger' });
+		new Setting(containerEl).setName('Danger zone').setHeading().setClass('danger');
 
 		new Setting(containerEl)
 			.setName('Reset sync memory')
 			.setClass('danger')
 			.setDesc('This will reset the last-sync timestamp and force a full resync of all articles.')
 			.addButton(resetSyncButton => resetSyncButton
-			// .setIcon('refresh-cw-off')
 			.setButtonText('Reset sync')
 			.onClick(async () => {
 				this.plugin.settings.since = 0;
