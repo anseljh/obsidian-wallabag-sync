@@ -1,0 +1,1 @@
+declare module '@harvard-lil/perma-js-sdk';

@@ -1,5 +1,6 @@
 import { App, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
 import TurndownService from 'turndown';
+import { PermaAPI } from "@harvard-lil/perma-js-sdk";
 
 const PLUGIN_NAME = 'Wallabag Sync';
 const DEBUG = false; // Set to true to enable debug logging
@@ -19,6 +20,7 @@ interface WallabagSyncSettings {
 	username: string;
 	password: string;
 	onlyStarred: boolean; // whether to only sync starred articles
+	permaAPIKey: string; // optional Perma.cc API key
 	// hidden settings:
 	accessToken: string;
 	refreshToken: string;
@@ -36,21 +38,28 @@ const DEFAULT_SETTINGS: Partial<WallabagSyncSettings> = {
 export default class WallabagSyncPlugin extends Plugin {
 	settings: WallabagSyncSettings;
 	turndownService: TurndownService;
+	permaAPI: any;
 
 	async onload() {
 		debugLog(`Loading plugin ${PLUGIN_NAME}...`)
 		await this.loadSettings();
 
-		// Create a little icon on the left ribbon.
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const ribbonIconEl = this.addRibbonIcon('newspaper', 'Sync Wallabag', () => {
-			this.syncWallabagArticles();
-		});
-
 		this.addCommand({
 			id: 'sync-wallabag-articles',
 			name: 'Sync Wallabag articles',
 			callback: () => this.syncWallabagArticles()
+		});
+		this.addRibbonIcon('newspaper', 'Sync Wallabag', () => {
+			this.syncWallabagArticles();
+		});
+
+		this.addCommand({
+			id: 'add-permalink',
+			name: 'Add permalink to this article',
+			callback: () => this.addPermalink()
+		})
+		this.addRibbonIcon('infinity', 'Add Perma link', () => {
+			this.addPermalink();
 		});
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
@@ -202,6 +211,76 @@ ${article.content ? this.turndownService.turndown(article.content) : ''}
 		}
 	}
 
+	initPermaAPI() {
+		// Init Perma API client (if API key is set)
+		if (this.settings.permaAPIKey && this.settings.permaAPIKey !== '') {
+			debugLog("Initializing Perma.cc API client.")
+			this.permaAPI = new PermaAPI(this.settings.permaAPIKey)
+		} else {
+			debugLog("No Perma.cc API key set; skipping initialization.")
+		}
+	}
+
+	addPermalinkProperty(file: TFile, permaLink: string) {
+		this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+			frontmatter.permalink = permaLink;
+			debugLog("Added permalink to frontmatter.");
+			debugLog(`Frontmatter: ${frontmatter}`);
+		});
+	}
+
+	addPermalink() {
+		debugLog("Adding Perma.cc link for current note.")
+
+		// Initialize Perma API if needed
+		if (!this.permaAPI) {
+			this.initPermaAPI();
+			if (!this.permaAPI) {
+				new Notice("Perma.cc API could not initialize. Please set your API key in the plugin settings.");
+				return;
+			}
+		}
+
+		// Get the current note file
+		const file = this.app.workspace.getActiveFile();
+		if (file instanceof TFile) {
+			let sourceUrl: string | null = null;
+			
+			// https://docs.obsidian.md/Reference/TypeScript+API/FileManager/processFrontMatter
+			debugLog("Before processFrontMatter()");
+			this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+				debugLog(`Frontmatter: ${frontmatter}`);
+
+				if (frontmatter && 'url' in frontmatter) {
+					sourceUrl = frontmatter.url;
+					debugLog(`Found source URL in frontmatter: ${sourceUrl}`);
+				}
+
+				if (sourceUrl && sourceUrl !== '') {
+					debugLog(`**Source URL: ${sourceUrl}**`);
+				}
+
+				// const archive = { guid: "TEST1234" }; // Mock result for testing
+				debugLog("Before createArchive() call.");
+				this.permaAPI.createArchive(sourceUrl).then(async (archive: any) => {
+
+					// 	// Notify that archive was created.
+					debugLog("Perma.cc archive created: " + JSON.stringify(archive));
+					new Notice(`Perma.cc link created: ${archive.guid}`);
+					
+					const permaLink = `https://perma.cc/${archive.guid}`;
+					this.addPermalinkProperty(file, permaLink);
+				}).catch((error: Error) => {
+					console.error("Error creating Perma.cc archive: " + error);
+					new Notice("Error creating Perma.cc archive.");
+				});
+				debugLog("After createArchive() call.");
+
+			});
+			debugLog("After processFrontMatter()");
+		}
+	}
+
 }
 
 class WallabagSyncSettingTab extends PluginSettingTab {
@@ -296,6 +375,20 @@ class WallabagSyncSettingTab extends PluginSettingTab {
 					this.plugin.settings.password = value.trim();
 					await this.plugin.saveSettings();
 				}));
+
+		new Setting(containerEl).setName('Permanent archiving').setHeading();
+
+		new Setting(containerEl)
+			.setName('Perma.cc API key')
+			.setDesc('Your API key for the Perma.cc archiving service (stored locally)')
+			.addText(text => {
+				text.setValue(this.plugin.settings.permaAPIKey || '')
+				.onChange(async (value) => {
+					this.plugin.settings.permaAPIKey = value.trim();
+					await this.plugin.saveSettings();
+				});
+				text.inputEl.type = 'password';
+			});
 
 		new Setting(containerEl).setName('Danger zone').setHeading().setClass('danger');
 
